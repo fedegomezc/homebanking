@@ -75,7 +75,7 @@ function crearCuenta(usuario) {
 
 // crear usuarios y cuentas
 const usuario1 = crearUsuario('Federico', 'Gomez', 'fedegomez@gmail.com'); 
-console.log(usuario1);
 
-const usuario2 = crearUsuario('Pablo', 'Gomez', 'pablogomez@gmail.com'); 
-console.log(usuario2);
+
+// const usuario2 = crearUsuario('Pablo', 'Gomez', 'pablogomez@gmail.com'); 
+// console.log(usuario2);
