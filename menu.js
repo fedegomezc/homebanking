@@ -1,3 +1,5 @@
+let transactionNumber = 1;
+
 function User(name, lastname, email, password = '1234') {
   this.name = name;
   this.lastname = lastname;
@@ -6,14 +8,27 @@ function User(name, lastname, email, password = '1234') {
   this.accounts = [];
 }
 
-User.prototype.agregarCuenta = (account) => this.accounts.push(account);
-const user1 = new User('Fede', 'Gomez', 'fedegomez@gmail.com');
+User.prototype.addAccount = function (account) {this.accounts.push(account)};
+
 
 function Account(accountNumber, currency, initialBalance){
   this.accountNumber = accountNumber;
   this.currency = currency;
   this.balance = initialBalance;
   this.transfers = [];
+}
+
+Account.prototype.transfer = function (receiverAccount, amount) {
+  if (this.currency === receiverAccount.currency && amount <= this.balance) {
+        this.balance -= amount;
+        receiverAccount.balance += amount;
+        transactionNumber++;
+        const transferNumber = transactionNumber.toString().padStart(5, "0");
+        this.transfers.push(new Transfer(amount, this.currency, this.accountNumber, receiverAccount.accountNumber, transferNumber));
+        return true;
+      } else {
+        return false; // Fondos insuficientes
+      }
 }
 
 function Transfer(amount, currency, senderAccount, receiverAccount, transferNumber) {
@@ -25,9 +40,48 @@ function Transfer(amount, currency, senderAccount, receiverAccount, transferNumb
   this.date = new Date().toLocaleString();  // para uso práctico (local). No es la forma correcta de implementarlo.
 }
 
+const users = [];
+
+function createUser(name, lastname, email, password = '1234') {
+  const newUser = new User(name, lastname, email, password);
+  users.push(newUser);
+  createAccount(newUser);
+  
+  return newUser;
+}
+
+function createAccount(user, currency = 'ARS', initialBalance) {
+  const accountNumber = `${Math.floor(Math.random() * 100_000_000)}`;
+  const arsAccount = new Account(accountNumber, currency, initialBalance);
+  user.addAccount(arsAccount);
+
+  return user.accounts;
+}
+
+/* createUser('John', 'Doe', 'john@example.com'),
+createUser('Jane', 'Smith', 'jane@example.com'),
+createUser('Michael', 'Johnson', 'michael@example.com'),
+createUser('Emily', 'Brown', 'emily@example.com'),
+createUser('William', 'Jones', 'william@example.com'),
+createUser('Olivia', 'Garcia', 'olivia@example.com'),
+createUser('James', 'Martinez', 'james@example.com'),
+createUser('Sophia', 'Lee', 'sophia@example.com'),
+createUser('Alexander', 'Rodriguez', 'alexander@example.com'),
+createUser('Abigail', 'Lopez', 'abigail@example.com') */
 
 
-  // depositar (monto) {
+// chequear que las cuentas emisor y receptor sean de la misma moneda
+// usar prototype para asignar funciones a los usuarios -> user.prototype.transfer = function..
+
+// function buscarUsuario(callback){
+//   const usuario = prompt(`Ingrese el ID o Email del usuario a buscar`);
+//   /* busco mi usuario */
+//   /* if(!usuario) return "El usuario no existe" */
+//   callback(usuario)
+// }
+
+
+// depositar (monto) {
   //   this.saldo += monto;
   //   this.registrarTransaccion('Depósito', monto, );
   // }
@@ -41,44 +95,3 @@ function Transfer(amount, currency, senderAccount, receiverAccount, transferNumb
   //     return false; // Fondos insuficientes
   //   }
   // }
-
-  // transferir(cantidad, cuentaDestino) {
-  //   if (cantidad <= this.saldo) {
-  //     this.saldo -= cantidad;
-  //     cuentaDestino.depositar(cantidad);
-  //     this.registrarTransaccion(`Transferencia a ${cuentaDestino.numeroCuenta}`, -cantidad, this.numeroCuenta, cuentaDestino.numeroCuenta);
-  //     return true;
-  //   } else {
-  //     return false; // Fondos insuficientes
-  //   }
-  // }
-
-  // registrarTransaccion(descripcion, cantidad, emisor, receptor) {
-  //   this.transacciones.push({ descripcion, cantidad, emisor, receptor, fecha: new Date() });
-  // }
-
-
-const usuarios = [];
-
-function crearUsuario(nombre, apellido, email) {
-  const nuevoUsuario = new Usuario(nombre, apellido, email);
-  usuarios.push(nuevoUsuario);
-  crearCuenta(nuevoUsuario);
-  
-  return nuevoUsuario;
-}
-
-function crearCuenta(usuario) {
-  const numeroCuenta = `${Math.floor(Math.random() * 100_000_000)}`;
-  const cuentaPesos = new Cuenta(numeroCuenta, 1000);
-  const cuentaDolar = new Cuenta(`d${numeroCuenta}`, 0);
-  usuario.agregarCuenta(cuentaPesos);
-  usuario.agregarCuenta(cuentaDolar);
-
-  return usuario.cuentas;
-}
-
-
-// generar usuarios fake con chatGPT
-// chequear que las cuentas emisor y receptor sean de la misma moneda
-// usar prototype para asignar funciones a los usuarios -> user.prototype.transfer = function..
