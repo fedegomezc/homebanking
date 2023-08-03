@@ -10,11 +10,11 @@ function User(name, lastname, email, password = '1234') {
   this.accounts = [];
 }
 
-function Account(accountNumber, currency, typeAccount, initialBalance) {
+function Account(accountNumber, currency, typeAccount, balance) {
   this.accountNumber = accountNumber;
   this.currency = currency;
   this.typeAccount = typeAccount;  // Caja de Ahorro (CA) | Cuenta Corriente (CC)
-  this.balance = initialBalance;
+  this.balance = balance;
   this.transfers = [];
 }
 
@@ -43,6 +43,10 @@ Account.prototype.newTransfer = function (receiverAccount, amount) {
   } else {
     return false; // Fondos insuficientes o el tipo de moneda es distinto
   }
+}
+Account.prototype.showBalance = function () {
+  let text = `${this.accountNumber}: ${this.currency} ${this.balance}`;
+  return text;
 }
 
 // funciones
@@ -80,7 +84,7 @@ const initialMenu = () => {
       newUser();
       break;
     case 3:
-      alert('Gracias por utilizar el homebanking 👋');
+      alert('Gracias por utilizar nuestro homebanking 👋');
       break;
     default:
       alert('Opción no válida. Por favor, seleccione una opción válida.');
@@ -88,13 +92,13 @@ const initialMenu = () => {
       break;
   }
 }
-
+// verificar si el usuario ya existe (a fines practicos usar e-mail, ver de implementar DNI)
 const newUser = () => {
   let name = prompt('Ingresar nombre: ');
   let lastName = prompt('Ingresar apellido: ');
   let email = prompt('Ingrese email: ');
   let password = prompt('Ingrese contraseña: ');
-  let usuarioCreado = createUser(name, lastName, email, password = '1234');
+  let usuarioCreado = createUser(name, lastName, email, password);
   alert(`Felicitaciones ${name}! Usuario creado exitosamente.`);
   return usuarioCreado;
 }
@@ -102,34 +106,29 @@ const newUser = () => {
 const logIn = () => {
   const email = prompt('Ingrese su email: ');
   const password = prompt('Ingrese su contraseña: ');
-
   const userFound = users.find((user) => user.email === email && user.password === password);
-  if(userFound) {
-    userMenu(userFound);
-  } else {
-    alert('Datos incorrectos. Intente de nuevo');
-    initialMenu();
-  }
+
+  userFound ? userMenu(userFound) : alert('Datos incorrectos. Intente de nuevo');
+  initialMenu();
 }
 
 const userMenu = (user) => {
-  const account1 = user.accounts[0]; // implementar optional chaining ?. 
+  const text = user.accounts.map((account) => account.showBalance()).join('\n');
   const option = parseInt(prompt(
     `Bienvenido/a ${user.name}!\n\n` +
-    `${account1.accountNumber}: ${account1.currency} ${account1.balance}\n\n` +
+    `${text}\n\n` +
 
-    'Menú de opciones:\n' +
+    '¿Que desea realizar?\n' +
     '1. Operar cuenta\n' +
-    '2. Transferencias\n' +
-    '3. Compra y venta de divisas\n' +
-    '4. Resumen de cuenta\n' +
-    '5. Solicitar nueva cuenta\n' +
-    '6. Salir'
+    '2. Compra y venta de divisas\n' +
+    '3. Resumen de cuenta\n' +
+    '4. Solicitar nueva cuenta\n' +
+    '5. Salir'
   ));
 
     switch(option) {
       case 1:
-        alert('Función en desarrollo');
+        operateAccount(user);
         break;
       case 2:
         alert('Función en desarrollo');
@@ -141,12 +140,40 @@ const userMenu = (user) => {
         alert('Función en desarrollo');
         break;
       case 5:
-        alert('Función en desarrollo');
+        alert('Gracias por operar con nosotros!');
+        initialMenu();
+        break;
+      default:
+        alert('Opción invalida. Por favor seleccione una opción válida.');
+        userMenu(user);
         break;
     }
 }
 
-createUser('John', 'Doe', 'john@example.com');
+const operateAccount = (user) => {
+  const text1 = user.accounts.map((account) => account.showBalance()).join('\n');
+  const text2 = user.accounts.map((account, index) => `${index + 1}. ${account.accountNumber}`).join('\n');
+  const option = parseInt(prompt(
+    `${text1}\n\n` +
+
+    'Seleccionar cuenta a operar:\n' +
+    `${text2}\n`
+  ));
+  const selectedAccount = user.accounts[option - 1];
+  
+  selectedAccount ? operationsMenu(selectedAccount) : alert('Opción invalida. Por favor seleccione una opción válida.');
+  operateAccount(user);
+}
+
+const operationsMenu = (selectedAccount) => {
+  alert(`Ha elegido ${selectedAccount.accountNumber}. Función en desarrollo`);
+}
+
+let userPrueba = createUser('John', 'Doe', 'john@example.com');
+createAccount(userPrueba, 'USD', 'CA', 0); //agrego cuenta para probar si se muestra en el userMenu
+createAccount(userPrueba, 'ARS', 'CC', 0);
+// console.log(userPrueba);
+
 createUser('Jane', 'Smith', 'jane@example.com');
 createUser('Michael', 'Johnson', 'michael@example.com'),
 createUser('Emily', 'Brown', 'emily@example.com'),
