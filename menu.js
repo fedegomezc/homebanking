@@ -29,11 +29,11 @@ function Transfer(amount, currency, senderAccount, receiverAccount, transferNumb
 // methods
 User.prototype.addAccount = function (account) { this.accounts.push(account) };
 
-Account.prototype.newTransfer = function (receiverAccount, amount) {
+Account.prototype.newTransfer = function (receiverAccount, amount) {        // modificar utilizando negación, ver lógica error fondos insuficientes
   if (this.currency === receiverAccount.currency && amount <= this.balance) {
     this.balance -= amount;
     receiverAccount.balance += amount;
-    // register information for each account
+    // register information for each account (La información es guardad en un objeto, la debería mostrar en texto?)
     transactionNumber++;
     const transferNumber = transactionNumber.toString().padStart(7, "0");  // '0000201'
     const transferInformation = new Transfer(amount, this.currency, this.accountNumber, receiverAccount.accountNumber, transferNumber);
@@ -44,6 +44,15 @@ Account.prototype.newTransfer = function (receiverAccount, amount) {
     return false; // Fondos insuficientes o el tipo de moneda es distinto
   }
 }
+Account.prototype.newDepositWithdraw = function (operationType, amount) {
+  operationType === '1' ? 
+    this.balance += amount : 
+    this.balance -= amount;
+    operationType = operationType === '1' ? 'Depósito' : 'Extracción' 
+  let operationInfo = {operationType, currency: this.currency , amount, balance: this.balance, fecha: new Date().toLocaleString()}
+  this.transfers.push(operationInfo);
+}
+
 Account.prototype.showBalance = function () {
   let text = `${this.accountNumber}: ${this.currency} ${this.balance}`;
   return text;
@@ -155,18 +164,46 @@ const operateAccount = (user) => {
   const text2 = user.accounts.map((account, index) => `${index + 1}. ${account.accountNumber}`).join('\n');
   const option = parseInt(prompt(
     `${text1}\n\n` +
-
     'Seleccionar cuenta a operar:\n' +
     `${text2}\n`
   ));
   const selectedAccount = user.accounts[option - 1];
   
-  selectedAccount ? operationsMenu(selectedAccount) : alert('Opción invalida. Por favor seleccione una opción válida.');
+  selectedAccount ? operationsMenu(user, selectedAccount) : alert('Opción invalida. Por favor seleccione una opción válida.');
   operateAccount(user);
 }
 
-const operationsMenu = (selectedAccount) => {
-  alert(`Ha elegido ${selectedAccount.accountNumber}. Función en desarrollo`);
+const operationsMenu = (user, selectedAccount) => {
+  const text = selectedAccount.showBalance()
+  const option = parseInt(prompt(
+    `${text}\n\n` +
+
+    '¿Que operación desea realizar?\n' +
+    '1. Depositar dinero\n' +
+    '2. Extraer dinero\n' +
+    '3. Transferencia\n' +
+    '4. Volver'
+  ));
+  
+  switch(option) {
+    case 1:
+      alert('Función en desarrollo');
+      break;
+    case 2:
+      alert('Función en desarrollo');
+      break;
+    case 3:
+      alert('Función en desarrollo');
+      break;
+    case 4:
+      operateAccount(user);
+      break;
+    default:
+      alert('Opción invalida. Por favor seleccione una opción válida.');
+      operationsMenu(user, selectedAccount);
+      break;
+  }
+
 }
 
 let userPrueba = createUser('John', 'Doe', 'john@example.com');
@@ -184,8 +221,8 @@ createUser('Sophia', 'Lee', 'sophia@example.com'),
 createUser('Alexander', 'Rodriguez', 'alexander@example.com'),
 createUser('Abigail', 'Lopez', 'abigail@example.com')
 
-// Simulando una transferencia //
-/* let user1 = createUser('John', 'Doe', 'john@example.com');
+/* // Simulando una transferencia //
+let user1 = createUser('John', 'Doe', 'john@example.com');
 let user2 = createUser('Jane', 'Smith', 'jane@example.com');
 // antes
 console.log(user1.accounts);
