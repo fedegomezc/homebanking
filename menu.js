@@ -44,11 +44,15 @@ Account.prototype.newTransfer = function (receiverAccount, amount) {        // m
     return false; // Fondos insuficientes o el tipo de moneda es distinto
   }
 }
-Account.prototype.newDepositWithdraw = function (operationType, amount) {
-  operationType === '1' ? 
-    this.balance += amount : 
-    this.balance -= amount;
-    operationType = operationType === '1' ? 'Depósito' : 'Extracción' 
+Account.prototype.newDeposit = function (amount) {
+  this.balance += amount;
+  let operationType = 'Depósito';
+  let operationInfo = {operationType, currency: this.currency , amount, balance: this.balance, fecha: new Date().toLocaleString()}
+  this.transfers.push(operationInfo);
+}
+Account.prototype.newWithdraw = function (amount) {
+  this.balance -= amount;
+  let operationType = 'Extracción';
   let operationInfo = {operationType, currency: this.currency , amount, balance: this.balance, fecha: new Date().toLocaleString()}
   this.transfers.push(operationInfo);
 }
@@ -162,19 +166,29 @@ const userMenu = (user) => {
 const operateAccount = (user) => {
   const text1 = user.accounts.map((account) => account.showBalance()).join('\n');
   const text2 = user.accounts.map((account, index) => `${index + 1}. ${account.accountNumber}`).join('\n');
+  let lengthAccountsArray = user.accounts.length;
+
   const option = parseInt(prompt(
     `${text1}\n\n` +
     'Seleccionar cuenta a operar:\n' +
-    `${text2}\n`
+    `${text2}\n` +
+    `${lengthAccountsArray + 1}. Volver`
   ));
-  const selectedAccount = user.accounts[option - 1];
+  const selectedAccountPosition = option - 1;
   
-  selectedAccount ? operationsMenu(user, selectedAccount) : alert('Opción invalida. Por favor seleccione una opción válida.');
-  operateAccount(user);
+  if (option === lengthAccountsArray + 1){
+    userMenu(user);
+  } else if (selectedAccountPosition >= 0 && selectedAccountPosition < lengthAccountsArray){
+    operationsMenu(user, selectedAccountPosition) ;
+  } else {
+    alert('Opción invalida. Por favor seleccione una opción válida.');
+    operateAccount(user);
+  }
 }
 
-const operationsMenu = (user, selectedAccount) => {
-  const text = selectedAccount.showBalance()
+const operationsMenu = (user, selectedAccountPosition) => {
+  const text = user.accounts[selectedAccountPosition].showBalance()
+  let account = user.accounts[selectedAccountPosition];
   const option = parseInt(prompt(
     `${text}\n\n` +
 
@@ -187,10 +201,12 @@ const operationsMenu = (user, selectedAccount) => {
   
   switch(option) {
     case 1:
-      alert('Función en desarrollo');
+      let amount = parseInt(prompt('Ingrese el valor a depositar: '));
+      !amount ? alert('ingrese un número') : account.newDeposit(amount);
       break;
     case 2:
-      alert('Función en desarrollo');
+      let amount2 = parseInt(prompt('Ingrese el valor a retirar: '));
+      account.newWithdraw (amount2);
       break;
     case 3:
       alert('Función en desarrollo');
@@ -200,7 +216,7 @@ const operationsMenu = (user, selectedAccount) => {
       break;
     default:
       alert('Opción invalida. Por favor seleccione una opción válida.');
-      operationsMenu(user, selectedAccount);
+      operationsMenu(user, selectedAccountPosition);
       break;
   }
 
