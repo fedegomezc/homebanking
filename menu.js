@@ -29,31 +29,37 @@ function Transfer(amount, currency, senderAccount, receiverAccount, transferNumb
 // methods
 User.prototype.addAccount = function (account) { this.accounts.push(account) };
 
-Account.prototype.newTransfer = function (receiverAccount, amount) {        // modificar utilizando negación, ver lógica error fondos insuficientes
-  if (this.currency === receiverAccount.currency && amount <= this.balance) {
-    this.balance -= amount;
-    receiverAccount.balance += amount;
-    // register information for each account (La información es guardad en un objeto, la debería mostrar en texto?)
-    transactionNumber++;
-    const transferNumber = transactionNumber.toString().padStart(7, "0");  // '0000201'
-    const transferInformation = new Transfer(amount, this.currency, this.accountNumber, receiverAccount.accountNumber, transferNumber);
-    this.transfers.push(transferInformation);
-    receiverAccount.transfers.push(transferInformation);
-    return true;
-  } else {
-    return false; // Fondos insuficientes o el tipo de moneda es distinto
+Account.prototype.newTransfer = function (receiverAccount, amount) {
+  if (this.currency !== receiverAccount.currency) {
+    alert('La cuenta destino debe ser de la misma moneda. Vuelva a intentarlo');
+    return false;
   }
+  let negativeBalanceAllowed = 1000;
+  let availableBalance = this.typeAccount !== 'CC' ? this.balance : this.balance + negativeBalanceAllowed;
+  if (amount > availableBalance) {
+    alert('Fondos insuficientes');
+    return false;
+  }
+
+  this.balance -= amount;
+  receiverAccount.balance += amount;
+  // register information for each account (La información es guardad en un objeto, la debería mostrar en texto?)
+  transactionNumber++;
+  const transferNumber = transactionNumber.toString().padStart(7, "0");  // '0000201'
+  const transferInformation = new Transfer(amount, this.currency, this.accountNumber, receiverAccount.accountNumber, transferNumber);
+  this.transfers.push(transferInformation);
+  receiverAccount.transfers.push(transferInformation);
 }
 Account.prototype.newDeposit = function (amount) {
   this.balance += amount;
   let operationType = 'Depósito';
-  let operationInfo = {operationType, currency: this.currency , amount, balance: this.balance, fecha: new Date().toLocaleString()}
+  let operationInfo = { operationType, currency: this.currency, amount, balance: this.balance, fecha: new Date().toLocaleString() }
   this.transfers.push(operationInfo);
 }
 Account.prototype.newWithdraw = function (amount) {
   this.balance -= amount;
   let operationType = 'Extracción';
-  let operationInfo = {operationType, currency: this.currency , amount, balance: this.balance, fecha: new Date().toLocaleString()}
+  let operationInfo = { operationType, currency: this.currency, amount, balance: this.balance, fecha: new Date().toLocaleString() }
   this.transfers.push(operationInfo);
 }
 
@@ -139,28 +145,28 @@ const userMenu = (user) => {
     '5. Salir'
   ));
 
-    switch(option) {
-      case 1:
-        operateAccount(user);
-        break;
-      case 2:
-        alert('Función en desarrollo');
-        break;
-      case 3:
-        alert('Función en desarrollo');
-        break;
-      case 4:
-        alert('Función en desarrollo');
-        break;
-      case 5:
-        alert('Gracias por operar con nosotros!');
-        initialMenu();
-        break;
-      default:
-        alert('Opción invalida. Por favor seleccione una opción válida.');
-        userMenu(user);
-        break;
-    }
+  switch (option) {
+    case 1:
+      operateAccount(user);
+      break;
+    case 2:
+      alert('Función en desarrollo');
+      break;
+    case 3:
+      alert('Función en desarrollo');
+      break;
+    case 4:
+      alert('Función en desarrollo');
+      break;
+    case 5:
+      alert('Gracias por operar con nosotros!');
+      initialMenu();
+      break;
+    default:
+      alert('Opción invalida. Por favor seleccione una opción válida.');
+      userMenu(user);
+      break;
+  }
 }
 
 const operateAccount = (user) => {
@@ -175,11 +181,11 @@ const operateAccount = (user) => {
     `${lengthAccountsArray + 1}. Volver`
   ));
   const selectedAccountPosition = option - 1;
-  
-  if (option === lengthAccountsArray + 1){
+
+  if (option === lengthAccountsArray + 1) {
     userMenu(user);
-  } else if (selectedAccountPosition >= 0 && selectedAccountPosition < lengthAccountsArray){
-    operationsMenu(user, selectedAccountPosition) ;
+  } else if (selectedAccountPosition >= 0 && selectedAccountPosition < lengthAccountsArray) {
+    operationsMenu(user, selectedAccountPosition);
   } else {
     alert('Opción invalida. Por favor seleccione una opción válida.');
     operateAccount(user);
@@ -198,15 +204,27 @@ const operationsMenu = (user, selectedAccountPosition) => {
     '3. Transferencia\n' +
     '4. Volver'
   ));
-  
-  switch(option) {
+
+  switch (option) {
     case 1:
-      let amount = parseInt(prompt('Ingrese el valor a depositar: '));
-      !amount ? alert('ingrese un número') : account.newDeposit(amount);
+      let amount1 = parseInt(prompt('Ingrese el valor a depositar: '));
+      if (!amount1) {
+        alert('Valor mal ingresado. Vuelva a intentarlo');
+        operationsMenu(user, selectedAccountPosition);
+      }
+      account.newDeposit(amount1);
+      alert('Operación exitosa');
+      userMenu(user);
       break;
     case 2:
       let amount2 = parseInt(prompt('Ingrese el valor a retirar: '));
-      account.newWithdraw (amount2);
+      if (!amount2) {
+        alert('Valor mal ingresado. Vuelva a intentarlo');
+        operationsMenu(user, selectedAccountPosition);
+      }
+      account.newWithdraw(amount2);
+      alert('Operación exitosa');
+      userMenu(user);
       break;
     case 3:
       alert('Función en desarrollo');
@@ -229,22 +247,24 @@ createAccount(userPrueba, 'ARS', 'CC', 0);
 
 createUser('Jane', 'Smith', 'jane@example.com');
 createUser('Michael', 'Johnson', 'michael@example.com'),
-createUser('Emily', 'Brown', 'emily@example.com'),
-createUser('William', 'Jones', 'william@example.com'),
-createUser('Olivia', 'Garcia', 'olivia@example.com'),
-createUser('James', 'Martinez', 'james@example.com'),
-createUser('Sophia', 'Lee', 'sophia@example.com'),
-createUser('Alexander', 'Rodriguez', 'alexander@example.com'),
-createUser('Abigail', 'Lopez', 'abigail@example.com')
+  createUser('Emily', 'Brown', 'emily@example.com'),
+  createUser('William', 'Jones', 'william@example.com'),
+  createUser('Olivia', 'Garcia', 'olivia@example.com'),
+  createUser('James', 'Martinez', 'james@example.com'),
+  createUser('Sophia', 'Lee', 'sophia@example.com'),
+  createUser('Alexander', 'Rodriguez', 'alexander@example.com'),
+  createUser('Abigail', 'Lopez', 'abigail@example.com')
 
 /* // Simulando una transferencia //
 let user1 = createUser('John', 'Doe', 'john@example.com');
+createAccount(user1, 'USD', 'CA', 0); 
+createAccount(user1, 'ARS', 'CC', 0);
 let user2 = createUser('Jane', 'Smith', 'jane@example.com');
 // antes
 console.log(user1.accounts);
 console.log(user2.accounts);
 //transferencia
-user1.accounts[0].newTransfer(user2.accounts[0], 500);
+user1.accounts[1].newTransfer(user2.accounts[0], 500);
 //despues
 console.log(user1.accounts);
 console.log(user2.accounts);
