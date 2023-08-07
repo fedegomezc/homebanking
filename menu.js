@@ -85,6 +85,13 @@ function createAccount(user, currency, typeAccount, initialBalance) {
 
   return user.accounts;
 }
+function searchUserAccount(accountNumber) {
+  const userAccountFound = users
+    .flatMap((user) => user.accounts)
+    .find((account) => account.accountNumber === accountNumber);
+
+  return userAccountFound || null;
+}
 
 // menu
 const initialMenu = () => {
@@ -227,7 +234,16 @@ const operationsMenu = (user, selectedAccountPosition) => {
       userMenu(user);
       break;
     case 3:
-      alert('Función en desarrollo');
+      let receiverAccountNumber = prompt('Ingrese el numero de cuenta a transferir: ');
+      let receiverAccount = searchUserAccount(receiverAccountNumber);
+      if (!receiverAccount) {
+        alert('Cuenta no encontrada. Verifique que la cuenta ingresada sea correcta.');
+        operationsMenu(user, selectedAccountPosition);
+      }
+      let amount3 = parseInt(prompt('Ingrese el valor a transferir: '));
+      account.newTransfer(receiverAccount, amount3)
+      alert('Operación exitosa');
+      userMenu(user);
       break;
     case 4:
       operateAccount(user);
@@ -237,23 +253,28 @@ const operationsMenu = (user, selectedAccountPosition) => {
       operationsMenu(user, selectedAccountPosition);
       break;
   }
-
 }
+
+
 
 let userPrueba = createUser('John', 'Doe', 'john@example.com');
 createAccount(userPrueba, 'USD', 'CA', 0); //agrego cuenta para probar si se muestra en el userMenu
 createAccount(userPrueba, 'ARS', 'CC', 0);
 // console.log(userPrueba);
+// console.log(searchUserAccount('CA101'));
 
 createUser('Jane', 'Smith', 'jane@example.com');
 createUser('Michael', 'Johnson', 'michael@example.com'),
-  createUser('Emily', 'Brown', 'emily@example.com'),
-  createUser('William', 'Jones', 'william@example.com'),
-  createUser('Olivia', 'Garcia', 'olivia@example.com'),
-  createUser('James', 'Martinez', 'james@example.com'),
-  createUser('Sophia', 'Lee', 'sophia@example.com'),
-  createUser('Alexander', 'Rodriguez', 'alexander@example.com'),
-  createUser('Abigail', 'Lopez', 'abigail@example.com')
+createUser('Emily', 'Brown', 'emily@example.com'),
+createUser('William', 'Jones', 'william@example.com'),
+createUser('Olivia', 'Garcia', 'olivia@example.com'),
+createUser('James', 'Martinez', 'james@example.com'),
+createUser('Sophia', 'Lee', 'sophia@example.com'),
+createUser('Alexander', 'Rodriguez', 'alexander@example.com'),
+createUser('Abigail', 'Lopez', 'abigail@example.com')
+
+// console.log(users);
+initialMenu();
 
 /* // Simulando una transferencia //
 let user1 = createUser('John', 'Doe', 'john@example.com');
@@ -271,29 +292,3 @@ console.log(user2.accounts);
 console.log(user1.accounts[0].transfers[0]);
 console.log(user2.accounts[0].transfers[0]); */
 
-initialMenu();
-
-
-
-// function buscarUsuario(callback){
-//   const usuario = prompt(`Ingrese el ID o Email del usuario a buscar`);
-//   /* busco mi usuario */
-//   /* if(!usuario) return "El usuario no existe" */
-//   callback(usuario)
-// }
-
-
-// depositar (monto) {
-  //   this.saldo += monto;
-  //   this.registrarTransaccion('Depósito', monto, );
-  // }
-
-  // retirar(monto) {
-  //   if (monto <= this.saldo) {
-  //     this.saldo -= monto;
-  //     this.registrarTransaccion('Retiro', -monto);
-  //     return true;
-  //   } else {
-  //     return false; // Fondos insuficientes
-  //   }
-  // }
